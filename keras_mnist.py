@@ -35,10 +35,9 @@ def get_train_and_test_data() -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.n
     Загрузка и подготовка датасета Mnist
     :return: (x_train, y_train), (x_test, y_test)
     """
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-    # X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
-    # X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
+    # загружаем датасет
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
     x_train = x_train.astype(dtype=float)
     x_test = x_test.astype(dtype=float)
