@@ -8,7 +8,8 @@ import cv2
 
 import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Convolution2D, MaxPooling2D
 from keras.src.utils import to_categorical
 
 from keras.datasets import mnist
@@ -17,6 +18,10 @@ np.random.seed(123)
 
 
 def create_model():
+    """
+    Создание простой модели
+    :return:
+    """
     new_model = Sequential()
 
     new_model.add(Flatten())
@@ -26,6 +31,30 @@ def create_model():
     new_model.add(Activation(tf.nn.relu))
     new_model.add(Dense(10))
     new_model.add(Activation(tf.nn.sigmoid))
+
+    return new_model
+
+
+def create_model_conv2d():
+    """
+    Создание более сложной/тяжелой модели
+    :return:
+    """
+    new_model = Sequential()
+
+    new_model.add(Convolution2D(32, (3, 3), input_shape=(28, 28, 1)))
+    new_model.add(Activation(tf.nn.relu))
+    new_model.add(Convolution2D(32, (3, 3)))
+    new_model.add(Activation(tf.nn.relu))
+    new_model.add(MaxPooling2D(pool_size=(2, 2)))
+    new_model.add(Dropout(0.25))
+
+    new_model.add(Flatten())
+    new_model.add(Dense(128))
+    new_model.add(Activation(tf.nn.relu))
+    new_model.add(Dropout(0.5))
+    new_model.add(Dense(10))
+    new_model.add(Activation(tf.nn.softmax))
 
     return new_model
 
@@ -102,7 +131,7 @@ def test_model(model_to_test, x_test: np.ndarray, y_test: np.ndarray, show_image
 
 
 def model_1():
-    model = create_model()
+    model = create_model_conv2d()
 
     (X_train, y_train), (X_test, y_test) = get_train_and_test_data()
 
