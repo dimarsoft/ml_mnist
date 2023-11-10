@@ -131,6 +131,18 @@ def test_model(model_to_test, x_test: np.ndarray, y_test: np.ndarray, show_image
 
 
 def model_1():
+    print("Test simple model")
+    model = create_model()
+
+    (X_train, y_train), (X_test, y_test) = get_train_and_test_data()
+
+    train_model(model_to_train=model, x_train=X_train, y_train=y_train)
+    test_model(model_to_test=model, x_test=X_test, y_test=y_test, show_image=False)
+
+
+def model_2():
+    print("Test model with conv2d layers")
+
     model = create_model_conv2d()
 
     (X_train, y_train), (X_test, y_test) = get_train_and_test_data()
@@ -140,3 +152,4 @@ def model_1():
 
 
 model_1()
+model_2()
