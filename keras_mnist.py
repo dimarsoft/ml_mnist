@@ -1,5 +1,8 @@
 """
 Разпознование цифр Mnist с помощью Keras (tensorflow)
+
+https://github.com/meenuagarwal/MNIST-Classification-Using-Keras
+
 """
 from typing import Tuple
 

@@ -4,6 +4,13 @@
 Смотрел примеры:
 
 https://github.com/pytorch/examples/tree/main/mnist_hogwild
+
+https://medium.com/@ramamurthi96/a-simple-neural-network-model-for-mnist-using-pytorch-4b8b148ecbdc
+
+https://machinelearningmastery.com/develop-your-first-neural-network-with-pytorch-step-by-step/
+
+https://www.kaggle.com/code/geekysaint/solving-mnist-using-pytorch/notebook
+
 """
 from typing import Tuple
 
