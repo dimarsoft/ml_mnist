@@ -1,6 +1,7 @@
 """
 Разпознование цифр Mnist с помощью PyTorch
 """
+from typing import Tuple
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -12,25 +13,18 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torch import optim
 from torch import nn
-import torch.nn.functional as F
+import torch.nn.functional as torch_func
 
 from prettytable import PrettyTable
 
 
-def create_model():
-    model = nn.Sequential(
-        nn.Flatten(),
-        nn.Linear(in_features=784, out_features=128),
-        nn.ReLU(),
-        nn.Linear(in_features=128, out_features=64),
-        nn.ReLU(),
-        nn.Linear(in_features=64, out_features=10),
-        nn.Sigmoid()
-    )
-    return model
-
-
-def create_model_2(norm=False):
+def create_model(norm=False):
+    """
+    Создание модели
+    :param norm:
+    Создать слой для нормализации данных
+    :return: Модель
+    """
     model = nn.Sequential()
     model.append(nn.Flatten())
 
@@ -47,6 +41,30 @@ def create_model_2(norm=False):
     return model
 
 
+def create_model_conv2d():
+    """
+    Создание более сложной/тяжелой модели
+    :return:
+    """
+    model = new_model = nn.Sequential()
+
+    model.append(nn.Conv2d(1, 32, kernel_size=(3, 3), stride=1, padding=0))
+    model.append(nn.ReLU())
+    model.append(nn.Conv2d(32, 32, kernel_size=(3, 3), stride=1, padding=0))
+    model.append(nn.ReLU())
+    model.append(nn.MaxPool2d((2, 2)))
+    model.append(nn.Dropout(0.25))
+
+    model.append(nn.Flatten())
+    model.append(nn.Linear(32 * 12 * 12, 128))
+    model.append(nn.ReLU())
+    model.append(nn.Dropout(0.5))
+    model.append(nn.Linear(in_features=128, out_features=10))
+    model.append(nn.Softmax(dim=1))
+
+    return new_model
+
+
 def print_count_parameters(model):
     table = PrettyTable(["Modules", "Parameters"])
     total_params = 0
@@ -59,28 +77,15 @@ def print_count_parameters(model):
     return total_params
 
 
-def show_losses(train_loss_hist, test_loss_hist):
-    # clear_output()
-
-    plt.figure(figsize=(12, 4))
-
-    plt.subplot(1, 2, 1)
-    plt.title('Train Loss')
-    plt.plot(np.arange(len(train_loss_hist)), train_loss_hist)
-    plt.yscale('log')
-    plt.grid()
-
-    plt.subplot(1, 2, 2)
-    plt.title('Test Loss')
-    plt.plot(np.arange(len(test_loss_hist)), test_loss_hist)
-    plt.yscale('log')
-    plt.grid()
-
-    plt.show()
-
-
 def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist):
-    # clear_output()
+    """
+    Отбражение графиков loss и accuracy
+    :param train_loss_hist:
+    :param test_loss_hist:
+    :param train_accuracy_hist:
+    :param test_accuracy_hist:
+    :return:
+    """
 
     plt.figure(figsize=(12, 4))
 
@@ -111,7 +116,18 @@ def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accur
     plt.show()
 
 
-def train(model, train_loader, loss_function, optimizer, device, epoch, log_interval=-1):
+def train(model, train_loader, loss_function, optimizer, device, epoch, log_interval=-1) -> Tuple[float, float]:
+    """
+    Обучение модели и сбор метрик: loss и accuracy
+    :param model:
+    :param train_loader:
+    :param loss_function:
+    :param optimizer:
+    :param device:
+    :param epoch:
+    :param log_interval:
+    :return:
+    """
     model.train()
 
     total_loss = 0
@@ -133,7 +149,7 @@ def train(model, train_loader, loss_function, optimizer, device, epoch, log_inte
 
         if log_interval > 0 & (batch_idx % log_interval == 0):
             print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item()/len(data):.6f}')
+                  f'({100. * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item() / len(data):.6f}')
 
     total_items = len(train_loader.dataset)
 
@@ -143,7 +159,17 @@ def train(model, train_loader, loss_function, optimizer, device, epoch, log_inte
     return total_loss, correct
 
 
-def eval_model(model, train_loader, loss_function, device, epoch, log_interval=-1):
+def eval_model(model, train_loader, loss_function, device, epoch, log_interval=-1) -> Tuple[float, float]:
+    """
+    Проверка модели на тестовой выборке и сбор метрик: loss и accuracy
+    :param model:
+    :param train_loader:
+    :param loss_function:
+    :param device:
+    :param epoch:
+    :param log_interval:
+    :return:
+    """
     model.eval()
 
     total_loss = 0
@@ -164,7 +190,7 @@ def eval_model(model, train_loader, loss_function, device, epoch, log_interval=-
 
         if log_interval > 0 & (batch_idx % log_interval == 0):
             print(f'Eval Epoch: {epoch} [{batch_idx * len(data)}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item()/len(data):.6f}')
+                  f'({100. * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item() / len(data):.6f}')
 
     total_items = len(train_loader.dataset)
 
@@ -174,44 +200,15 @@ def eval_model(model, train_loader, loss_function, device, epoch, log_interval=-
     return total_loss, correct
 
 
-def run(model, dataloader, loss_function, optimizer=None):
-    # set the model to evaluation or training mode
-    if optimizer == None:
-        model.eval()
-    else:
-        model.train()
-
-    total_loss = 0
-
-    for X, y in dataloader:
-        # compute prediction
-        pred = model(X)
-        # compute loss
-        loss = loss_function(pred, y)
-
-        # print(f"loss = {loss}")
-        # save loss
-        total_loss += loss.item()
-        if optimizer != None:
-            # compute gradients
-            loss.backward()
-            # do optimizer step
-            optimizer.step()
-            # clear gradients
-            optimizer.zero_grad()
-
-    return total_loss / len(dataloader)
-
-
 def one_hot_transform(target):
-    return F.one_hot(torch.tensor(target), num_classes=10).to(dtype=torch.float)
+    return torch_func.one_hot(torch.tensor(target), num_classes=10).to(dtype=torch.float)
 
 
 def get_train_and_test_data(batch_size=10, batch_size_test=4):
-    # x (входы) трасформируем в тензоры
+    # x (входы) трансформируем в тензоры
     transform = transforms.ToTensor()
     """
-    так же можно применяь несколько трасформатором и данные нормаливать и/или конвертировать в диапазон [0, 1]
+    так же можно применять несколько трасформаторов и данные нормализовать и/или конвертировать в диапазон [0, 1]
     transform = transforms.Compose([
         transforms.ToTensor(),
         # transforms.Normalize((0.1307,), (0.3081,))
@@ -237,7 +234,7 @@ def get_train_and_test_data(batch_size=10, batch_size_test=4):
     return train_loader, test_loader
 
 
-def train_model(model_to_train, train_loader, test_loader, device, epochs=10, show_graph=True) -> None:
+def train_model(model_to_train, train_loader, test_loader, device, epochs=10, log_interval=-1, show_graph=True) -> None:
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model_to_train.parameters(), lr=1e-1)
 
@@ -251,8 +248,10 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, sh
 
     for i in range(epochs):
 
-        train_loss, train_accuracy = train(model_to_train, train_loader, loss_function, optimizer, device, i)
-        test_loss, test_accuracy = eval_model(model_to_train, test_loader, loss_function, device, i)
+        train_loss, train_accuracy = train(model_to_train, train_loader, loss_function, optimizer, device, i,
+                                           log_interval=log_interval)
+        test_loss, test_accuracy = eval_model(model_to_train, test_loader, loss_function, device, i,
+                                              log_interval=log_interval)
 
         print(f"epoch: {i + 1}/{epochs}, "
               f"train_loss = {train_loss:.6f}, train_accuracy = {train_accuracy:.6f}, "
@@ -279,7 +278,7 @@ def get_device():
         return torch.device("cpu")
 
 
-def model_1():
+def model_1(epochs=10):
     print("Test simple model")
 
     # устройство на котором обучаем, CPU/GPU
@@ -288,129 +287,37 @@ def model_1():
     # создаем модель и переносим на устройство
     model = create_model().to(my_device)
 
+    print_count_parameters(model)
+
     # загрузка и подготовка датасета
     train_loader, test_loader = get_train_and_test_data()
 
     # запуск обучения
 
-    train_model(model, train_loader, test_loader, device=my_device, epochs=2)
+    train_model(model, train_loader, test_loader, device=my_device, epochs=epochs)
 
 
-np.random.seed(123)
+def model_2(epochs=10):
+    print("Test hard model")
 
-model_1()
-'''
+    # устройство на котором обучаем, CPU/GPU
+    my_device = get_device()
 
-x = torch.tensor(1)
-xx = F.one_hot(x, num_classes=10).to(dtype=torch.float)
+    # создаем модель и переносим на устройство
+    model = create_model_conv2d().to(my_device)
 
-transform = transforms.ToTensor()
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    # transforms.Normalize((0.1307,), (0.3081,))
-])
+    print_count_parameters(model)
 
-target_transform = lambda target: F.one_hot(torch.tensor(target), num_classes=10).to(dtype=torch.float)
+    # загрузка и подготовка датасета
+    train_loader, test_loader = get_train_and_test_data()
 
-mnist_train = datasets.MNIST(root='mnist', download=True, train=True, transform=transform,
-                             target_transform=target_transform)
-mnist_test = datasets.MNIST(root='mnist', download=True, train=False, transform=transform,
-                            target_transform=target_transform)
+    # запуск обучения
 
-for item in mnist_train:
-    x, y = item
+    train_model(model, train_loader, test_loader, device=my_device, epochs=epochs)
 
-    break
-use_cuda = torch.cuda.is_available()
 
-print(f"use_cuda = {use_cuda}")
+if __name__ == '__main__':
+    np.random.seed(123)
 
-if use_cuda:
-    my_device = torch.device("cuda")
-else:
-    my_device = torch.device("cpu")
-
-batch_size = 64
-
-train_loader = DataLoader(mnist_train, batch_size=batch_size)
-test_loader = DataLoader(mnist_test, batch_size=8)
-
-my_model = create_model_2(norm=True)
-
-my_model = my_model.to(my_device)
-
-print_count_parameters(my_model)
-
-loss_function = nn.CrossEntropyLoss()
-
-optimizer = optim.SGD(my_model.parameters(), lr=1e-1, momentum=0.9)
-
-BATCH_SIZE = 8
-NUM_EPOCHS = 10
-
-# train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE)
-# test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
-
-train_loss_hist = []
-test_loss_hist = []
-
-train_accuracy_hist = []
-test_accuracy_hist = []
-
-for i in range(NUM_EPOCHS):
-    # train_loss = run(my_model, train_loader, loss_function, optimizer)
-
-    train_loss, train_accuracy = train(my_model, train_loader, loss_function, optimizer, my_device, i, log_interval=100)
-
-    # print(f"epoch = {i + 1}, train_loss = {train_loss}")
-    # print(f"epoch: {i + 1}/{NUM_EPOCHS}, train_loss = {train_loss}, train_accuracy = {train_accuracy}")
-    train_loss_hist.append(train_loss)
-    train_accuracy_hist.append(train_accuracy)
-
-    # test_loss = run(my_model, test_loader, loss_function)
-
-    test_loss, test_accuracy = eval_model(my_model, test_loader, loss_function, my_device, i, log_interval=100)
-
-    print(f"epoch: {i + 1}/{NUM_EPOCHS}, "
-          f"train_loss = {train_loss:.6f}, train_accuracy = {train_accuracy:.6f}, "
-          f"test_loss = {test_loss:.6f}, test_accuracy = {test_accuracy:.6f}")
-    test_loss_hist.append(test_loss)
-    test_accuracy_hist.append(train_accuracy)
-
-    # if i % 2 == 0: show_losses(train_loss_hist, test_loss_hist)
-
-show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist)
-
-"""
-
-my_model.eval()
-
-correct = 0
-
-for X, y in test_loader:
-    y = y.to(my_device)
-    # for i in np.random.choice(np.arange(0, 100), size=(10,)):
-    probs = my_model(X.to(my_device))
-    prediction = probs.argmax(axis=1, keepdims=True)
-    y_n = y.argmax(axis=1, keepdims=True)
-
-    correct += prediction.eq(y_n.view_as(prediction)).sum().item()
-
-    # correct = len(y)
-
-    # image = (X * 255).reshape((28, 28)).astype("uint8")
-
-    print(f"Actual digit is {y}({y_n}), predicted {prediction}, correct = {correct}")
-    # cv2.imshow("Digit", image)
-    # cv2.waitKey(0)
-
-    # break
-
-correct /= len(test_loader.dataset)
-
-print(f'Test set: Average loss: {test_loss:.4f}, '
-      f'Accuracy: {correct}/{len(test_loader.dataset)} ({100. * correct:.0f}%)')
-      
-"""
-
-'''
+    model_1(30)
+    model_2(30)
