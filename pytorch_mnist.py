@@ -1,5 +1,9 @@
 """
-Разпознование цифр Mnist с помощью PyTorch
+Разпознование цифр Mnist с помощью PyTorch.
+
+Смотрел примеры:
+
+https://github.com/pytorch/examples/tree/main/mnist_hogwild
 """
 from typing import Tuple
 
