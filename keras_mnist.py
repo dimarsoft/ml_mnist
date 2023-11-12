@@ -151,5 +151,6 @@ def model_2():
     test_model(model_to_test=model, x_test=X_test, y_test=y_test, show_image=False)
 
 
-model_1()
-model_2()
+if __name__ == '__main__':
+    model_1()
+    model_2()
