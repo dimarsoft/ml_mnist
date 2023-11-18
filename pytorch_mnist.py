@@ -26,9 +26,9 @@ from torch import optim
 from torch import nn
 import torch.nn.functional as torch_func
 
-# библиотеки для вывода информации о модели
-from torchsummary import summary as summary_1
-from torchinfo import summary as summary_2
+    # библиотеки для вывода информации о модели
+    from torchsummary import summary as summary_1
+    from torchinfo import summary as summary_2
 
 from prettytable import PrettyTable
 
@@ -342,11 +342,11 @@ def model_2(epochs=10):
 if __name__ == '__main__':
     np.random.seed(123)
 
-    model_1(3)
-    # model_2(30)
-    train_loss_hist = []
-    test_loss_hist = []
+    model_1(30)
+    model_2(30)
+    # train_loss_hist = []
+    # test_loss_hist = []
 
-    train_accuracy_hist = []
-    test_accuracy_hist = []
+    # train_accuracy_hist = []
+    # test_accuracy_hist = []
     # show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist)
