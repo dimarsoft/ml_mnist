@@ -26,7 +26,13 @@ from torch import optim
 from torch import nn
 import torch.nn.functional as torch_func
 
+# библиотеки для вывода информации о модели
+from torchsummary import summary as summary_1
+from torchinfo import summary as summary_2
+
 from prettytable import PrettyTable
+
+# import gi
 
 
 def create_model(norm=False):
@@ -298,6 +304,12 @@ def model_1(epochs=10):
     # создаем модель и переносим на устройство
     model = create_model().to(my_device)
 
+    print("1. summary from torchsummary")
+    summary_1(model, (28, 28, 1))
+
+    print("2. summary from torchinfo")
+    summary_2(model)
+
     print_count_parameters(model)
 
     # загрузка и подготовка датасета
@@ -330,5 +342,11 @@ def model_2(epochs=10):
 if __name__ == '__main__':
     np.random.seed(123)
 
-    model_1(30)
-    model_2(30)
+    model_1(3)
+    # model_2(30)
+    train_loss_hist = []
+    test_loss_hist = []
+
+    train_accuracy_hist = []
+    test_accuracy_hist = []
+    # show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist)
