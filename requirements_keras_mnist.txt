@@ -1,0 +1,8 @@
+# Usage: pip install -r requirements_keras_mnist.txt
+
+# Base ----------------------------------------
+matplotlib
+numpy
+opencv-python
+tensorflow
+keras

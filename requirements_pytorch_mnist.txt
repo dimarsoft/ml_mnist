@@ -1,0 +1,11 @@
+# Usage: pip install -r requirements_pytorch_mnist.txt
+
+# Base ----------------------------------------
+matplotlib
+numpy
+torch
+torchvision
+torchsummary
+torchinfo
+
+prettytable
