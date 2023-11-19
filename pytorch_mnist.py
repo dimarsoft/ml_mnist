@@ -254,10 +254,8 @@ def one_hot_transform(target) -> Tensor:
     :param target:
     :return:
     """
-    target = torch.tensor(target)
     # pylint: disable=E1102
-    t = one_hot(target, num_classes=10)
-    return t.to(dtype=torch.float)
+    return one_hot(torch.tensor(target), num_classes=10).to(dtype=torch.float)
 
 
 def get_train_and_test_data(batch_size=10, batch_size_test=4) -> Tuple[Any, Any]:
