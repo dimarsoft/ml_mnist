@@ -109,7 +109,7 @@ def train_model(model_to_train, x_train: np.ndarray, y_train: np.ndarray, batch_
 
 def test_model(model_to_test, x_test: np.ndarray, y_test: np.ndarray, show_image=True) -> None:
     """
-    Проверка модели на тестовой выбборке
+    Проверка модели на тестовой выборке
     :param model_to_test:
     :param x_test:
     :param y_test:
@@ -117,11 +117,11 @@ def test_model(model_to_test, x_test: np.ndarray, y_test: np.ndarray, show_image
     :return:
     """
 
-    # выбираем несколько картиток случайным образом
+    # выбираем несколько картинок случайным образом
     for i in np.random.choice(np.arange(0, len(y_test)), size=(20,)):
-        # распознование
+        # распознавание
         probs = model_to_test.predict(x_test[np.newaxis, i], verbose=0)
-        # выбираем с макс. вероятностью
+        # Выбираем с макс. вероятностью
         prediction = probs.argmax(axis=1)
 
         print(f"{i}, Actual digit is {y_test[i].argmax()}, predicted {prediction[0]}")

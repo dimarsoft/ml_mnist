@@ -97,7 +97,7 @@ def print_count_parameters(model):
 
 def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist, caption: str) -> None:
     """
-    Отбражение графиков loss и accuracy
+    Отображение графиков loss и accuracy
     :param caption: Заголовок окна с графиками
     :param train_loss_hist:
     :param test_loss_hist:
