@@ -255,6 +255,7 @@ def one_hot_transform(target) -> Tensor:
     :return:
     """
     target = torch.tensor(target)
+    # pylint: disable=E1102
     t = one_hot(target, num_classes=10)
     return t.to(dtype=torch.float)
 
