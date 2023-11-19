@@ -4,5 +4,5 @@
 matplotlib
 numpy
 opencv-python
-tensorflow
+tensorflow==2.13.1
 keras
