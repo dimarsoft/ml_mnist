@@ -36,11 +36,15 @@ from prettytable import PrettyTable
 # import gi
 
 
-def create_model(norm=False):
+def create_model(norm=False, dropout=False, batch_norm=False):
     """
     Создание модели
+    :param batch_norm:
+    Добавить слой BatchNorm
+    :param dropout:
+    Добавить слой Dropout
     :param norm:
-    Создать слой для нормализации данных
+    Добавить слой для нормализации данных
     :return: Модель
     """
     model = nn.Sequential()
@@ -50,10 +54,25 @@ def create_model(norm=False):
         model.append(nn.LayerNorm(784))
 
     model.append(nn.Linear(in_features=784, out_features=128))
+
+    if batch_norm:
+        model.append(nn.BatchNorm1d(num_features=128))
+
+    if dropout:
+        model.append(nn.Dropout(0.5))
+
     model.append(nn.ReLU())
     model.append(nn.Linear(in_features=128, out_features=64))
+
+    if dropout:
+        model.append(nn.Dropout(0.5))
+
     model.append(nn.ReLU())
     model.append(nn.Linear(in_features=64, out_features=10))
+
+    if dropout:
+        model.append(nn.Dropout(0.25))
+
     model.append(nn.Sigmoid())
 
     return model
@@ -227,7 +246,7 @@ def get_train_and_test_data(batch_size=10, batch_size_test=4):
     # x (входы) трансформируем в тензоры
     transform = transforms.ToTensor()
     """
-    так же можно применять несколько трасформаторов и данные нормализовать и/или конвертировать в диапазон [0, 1]
+    так же можно применять несколько трансформеров и данные нормализовать и/или конвертировать в диапазон [0, 1]
     transform = transforms.Compose([
         transforms.ToTensor(),
         # transforms.Normalize((0.1307,), (0.3081,))
@@ -309,7 +328,7 @@ def model_1(epochs=10):
     my_device = get_device()
 
     # создаем модель и переносим на устройство
-    model = create_model().to(my_device)
+    model = create_model(batch_norm=True).to(my_device)
 
     print("1. summary from torchsummary")
     summary_1(model, (28, 28, 1))
@@ -351,6 +370,7 @@ if __name__ == '__main__':
 
     model_1(30)
     model_2(30)
+
     # train_loss_hist = []
     # test_loss_hist = []
 
