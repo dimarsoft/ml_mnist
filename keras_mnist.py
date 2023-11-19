@@ -133,25 +133,33 @@ def test_model(model_to_test, x_test: np.ndarray, y_test: np.ndarray, show_image
             cv2.waitKey(0)
 
 
-def model_1():
+def model_1() -> None:
+    """
+    Test simple model
+    :return:
+    """
     print("Test simple model")
     model = create_model()
 
-    (X_train, y_train), (X_test, y_test) = get_train_and_test_data()
+    (x_train, y_train), (x_test, y_test) = get_train_and_test_data()
 
-    train_model(model_to_train=model, x_train=X_train, y_train=y_train)
-    test_model(model_to_test=model, x_test=X_test, y_test=y_test, show_image=False)
+    train_model(model_to_train=model, x_train=x_train, y_train=y_train)
+    test_model(model_to_test=model, x_test=x_test, y_test=y_test, show_image=False)
 
 
-def model_2():
+def model_2() -> None:
+    """
+    Test model with 'conv2d' layers
+    :return:
+    """
     print("Test model with conv2d layers")
 
     model = create_model_conv2d()
 
-    (X_train, y_train), (X_test, y_test) = get_train_and_test_data()
+    (x_train, y_train), (x_test, y_test) = get_train_and_test_data()
 
-    train_model(model_to_train=model, x_train=X_train, y_train=y_train)
-    test_model(model_to_test=model, x_test=X_test, y_test=y_test, show_image=False)
+    train_model(model_to_train=model, x_train=x_train, y_train=y_train)
+    test_model(model_to_test=model, x_test=x_test, y_test=y_test, show_image=False)
 
 
 if __name__ == '__main__':

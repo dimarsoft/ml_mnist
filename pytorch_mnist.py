@@ -11,8 +11,12 @@ https://machinelearningmastery.com/develop-your-first-neural-network-with-pytorc
 
 https://www.kaggle.com/code/geekysaint/solving-mnist-using-pytorch/notebook
 
+
+Настройка pyint:
+
+https://gist.github.com/uuklanger/fe65dc6da9169c1585abad4ac2b0d268
 """
-from typing import Tuple
+from typing import Tuple, Any
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -22,9 +26,8 @@ import torch
 from torchvision import datasets, transforms
 
 from torch.utils.data import DataLoader
-from torch import optim
-from torch import nn
-import torch.nn.functional as torch_func
+from torch import optim, Tensor, nn
+from torch.nn.functional import one_hot
 
 # библиотеки для вывода информации о модели
 from torchsummary import summary as summary_1
@@ -102,7 +105,14 @@ def create_model_conv2d():
     return new_model
 
 
-def print_count_parameters(model):
+def print_count_parameters(model) -> int:
+    """
+    Summary of model
+    :param model:
+    Model
+    :return:
+    Total Trainable Params
+    """
     table = PrettyTable(["Modules", "Parameters"])
     total_params = 0
     for name, parameter in model.named_parameters():
@@ -238,26 +248,38 @@ def eval_model(model, train_loader, loss_function, device, epoch, log_interval=-
     return total_loss, correct
 
 
-def one_hot_transform(target):
-    return torch_func.one_hot(torch.tensor(target), num_classes=10).to(dtype=torch.float)
+def one_hot_transform(target) -> Tensor:
+    """
+    Трансформация данных в one_hot
+    :param target:
+    :return:
+    """
+    target = torch.tensor(target)
+    t = one_hot(target, num_classes=10)
+    return t.to(dtype=torch.float)
 
 
-def get_train_and_test_data(batch_size=10, batch_size_test=4):
+def get_train_and_test_data(batch_size=10, batch_size_test=4) -> Tuple[Any, Any]:
+    """
+    Загрузка и подготовка данных для обучения модели
+    :param batch_size:
+    :param batch_size_test:
+    :return:
+    """
     # x (входы) трансформируем в тензоры
     transform = transforms.ToTensor()
-    """
-    так же можно применять несколько трансформеров и данные нормализовать и/или конвертировать в диапазон [0, 1]
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        # transforms.Normalize((0.1307,), (0.3081,))
-    ])
-    """
+
+    # так же можно применять несколько трансформеров и данные нормализовать и/или конвертировать в диапазон [0, 1]
+    # transform = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     # transforms.Normalize((0.1307,), (0.3081,))
+    # ])
 
     # y (ответы) кодируем в one_hot, т.к категории
 
     target_transform = one_hot_transform
 
-    print(f"mnist start load ...")
+    print("mnist start load ...")
 
     mnist_train = datasets.MNIST(root='mnist', download=True, train=True, transform=transform,
                                  target_transform=target_transform)
@@ -267,13 +289,25 @@ def get_train_and_test_data(batch_size=10, batch_size_test=4):
     train_loader = DataLoader(mnist_train, batch_size=batch_size)
     test_loader = DataLoader(mnist_test, batch_size=batch_size_test)
 
-    print(f"mnist loaded ...")
+    print("mnist loaded ...")
 
     return train_loader, test_loader
 
 
 def train_model(model_to_train, train_loader, test_loader, device, epochs=10, log_interval=-1, show_graph=True,
                 show_graph_only_total=False) -> None:
+    """
+    Обучение и проверка модели
+    :param model_to_train:
+    :param train_loader:
+    :param test_loader:
+    :param device:
+    :param epochs:
+    :param log_interval:
+    :param show_graph:
+    :param show_graph_only_total:
+    :return:
+    """
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model_to_train.parameters(), lr=1e-1)
 
@@ -311,17 +345,27 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, lo
 
 
 def get_device():
+    """
+    Получить устройство для обучения.
+    GPU если доступно, иначе CPU
+    :return:
+    """
     use_cuda = torch.cuda.is_available()
 
     print(f"use_cuda = {use_cuda}")
 
     if use_cuda:
         return torch.device("cuda")
-    else:
-        return torch.device("cpu")
+    return torch.device("cpu")
 
 
-def model_1(epochs=10):
+def model_1(epochs=10) -> None:
+    """
+    Test simple model
+    :param epochs:
+    :return:
+    """
+
     print("Test simple model")
 
     # устройство на котором обучаем, CPU/GPU
@@ -346,7 +390,12 @@ def model_1(epochs=10):
     train_model(model, train_loader, test_loader, device=my_device, epochs=epochs)
 
 
-def model_2(epochs=10):
+def model_2(epochs=10) -> None:
+    """
+    Test hard model
+    :param epochs:
+    :return:
+    """
     print("Test hard model")
 
     # устройство на котором обучаем, CPU/GPU
