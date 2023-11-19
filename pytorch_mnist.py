@@ -26,11 +26,12 @@ from torch import optim
 from torch import nn
 import torch.nn.functional as torch_func
 
-    # библиотеки для вывода информации о модели
-    from torchsummary import summary as summary_1
-    from torchinfo import summary as summary_2
+# библиотеки для вывода информации о модели
+from torchsummary import summary as summary_1
+from torchinfo import summary as summary_2
 
 from prettytable import PrettyTable
+
 
 # import gi
 
@@ -94,9 +95,10 @@ def print_count_parameters(model):
     return total_params
 
 
-def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist):
+def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist, caption: str) -> None:
     """
     Отбражение графиков loss и accuracy
+    :param caption: Заголовок окна с графиками
     :param train_loss_hist:
     :param test_loss_hist:
     :param train_accuracy_hist:
@@ -104,7 +106,7 @@ def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accur
     :return:
     """
 
-    plt.figure(figsize=(12, 4))
+    plt.figure(caption, figsize=(12, 4))
 
     plt.subplot(2, 2, 1)
     plt.title('Train Loss')
@@ -251,7 +253,8 @@ def get_train_and_test_data(batch_size=10, batch_size_test=4):
     return train_loader, test_loader
 
 
-def train_model(model_to_train, train_loader, test_loader, device, epochs=10, log_interval=-1, show_graph=True) -> None:
+def train_model(model_to_train, train_loader, test_loader, device, epochs=10, log_interval=-1, show_graph=True,
+                show_graph_only_total=False) -> None:
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model_to_train.parameters(), lr=1e-1)
 
@@ -280,8 +283,12 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, lo
             test_loss_hist.append(test_loss)
             test_accuracy_hist.append(train_accuracy)
 
-    if show_graph:
-        show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist)
+            if not show_graph_only_total:
+                show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist,
+                            f"epoch: {i + 1}/{epochs}")
+
+    if show_graph and show_graph_only_total:
+        show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist, "Finished")
 
 
 def get_device():
