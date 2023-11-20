@@ -15,6 +15,13 @@ https://www.kaggle.com/code/geekysaint/solving-mnist-using-pytorch/notebook
 Настройка pyint:
 
 https://gist.github.com/uuklanger/fe65dc6da9169c1585abad4ac2b0d268
+
+Была проблема с matplotlib backend (Fedora 39)
+https://pygobject.readthedocs.io/en/latest/getting_started.html#fedora-getting-started
+
+1. sudo dnf install python3.11-devel
+2. pip3 install pycairo to build and install Pycairo
+3. pip3 install PyGObject to build and install PyGObject
 """
 from typing import Tuple, Any
 
@@ -34,9 +41,6 @@ from torchsummary import summary as summary_1
 from torchinfo import summary as summary_2
 
 from prettytable import PrettyTable
-
-
-# import gi
 
 
 def create_model(norm=False, dropout=False, batch_norm=False):
