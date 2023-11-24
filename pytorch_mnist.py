@@ -61,6 +61,7 @@ def create_model(norm=False, dropout=False, batch_norm=False):
         model.append(nn.LayerNorm(784))
 
     model.append(nn.Linear(in_features=784, out_features=128))
+    model.append(nn.ReLU())
 
     if batch_norm:
         model.append(nn.BatchNorm1d(num_features=128))
@@ -68,13 +69,12 @@ def create_model(norm=False, dropout=False, batch_norm=False):
     if dropout:
         model.append(nn.Dropout(0.5))
 
-    model.append(nn.ReLU())
     model.append(nn.Linear(in_features=128, out_features=64))
+    model.append(nn.ReLU())
 
     if dropout:
         model.append(nn.Dropout(0.5))
 
-    model.append(nn.ReLU())
     model.append(nn.Linear(in_features=64, out_features=10))
 
     if dropout:
