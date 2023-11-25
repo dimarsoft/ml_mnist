@@ -368,7 +368,8 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, lo
     fig, axis = plt.subplots(2, 2, figsize=(12, 8))
 
     # заголовок окна
-    plt.get_current_fig_manager().set_window_title('Обучение модели')
+    if not is_code_in_colab:
+        plt.get_current_fig_manager().set_window_title('Обучение модели')
 
     # 2x2 в массив из 4 элементов
     axis = axis.flatten()
