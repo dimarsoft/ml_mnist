@@ -25,6 +25,8 @@ https://pygobject.readthedocs.io/en/latest/getting_started.html#fedora-getting-s
 """
 from typing import Tuple, Any, List
 
+import os
+# import random
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -42,20 +44,16 @@ from torchinfo import summary as summary_2
 
 from prettytable import PrettyTable
 
-import random
-
 
 def is_run_in_colab() -> bool:
     """
     Питон работает в Колабе Google
     :return:
     """
-    import os
 
     if os.getenv("COLAB_RELEASE_TAG"):
         return True
-    else:
-        return False
+    return False
 
 
 # сохраним в переменную
@@ -191,21 +189,21 @@ def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accur
     plt.show()
 
 
-def show_graphs_on_axis(ax: List, y: List[List], captions: List[str], clear=True) -> None:
+def show_graphs_on_axis(axis: List, y: List[List], captions: List[str], clear=True) -> None:
     """
     Построение графиков
-    :param ax: Массив осей
+    :param axis: Массив осей
     :param y: Массив с данными для каждой оси
     :param captions: Массив заголовков для осей
     :param clear: Очистка предыдущего графика
     :return:
     """
-    for i in range(len(ax)):
+    for i, ax in enumerate(axis):
         if clear:
-            ax[i].clear()
-        ax[i].plot(np.arange(len(y[i])), y[i])
-        ax[i].set_title(captions[i])
-        ax[i].grid(True)
+            ax.clear()
+        ax.plot(np.arange(len(y[i])), y[i])
+        ax.set_title(captions[i])
+        ax.grid(True)
 
 
 def train(model, train_loader, loss_function, optimizer, device, epoch, log_interval=-1) -> Tuple[float, float]:
@@ -402,7 +400,7 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, lo
             test_accuracy_hist.append(train_accuracy)
 
             if not show_graph_only_total:
-                fig.suptitle(f'Epoch {i+1}/{epochs}')
+                fig.suptitle(f'Epoch {i + 1}/{epochs}')
 
                 show_graphs_on_axis(axis, y, captions)
 
