@@ -23,7 +23,7 @@ https://pygobject.readthedocs.io/en/latest/getting_started.html#fedora-getting-s
 2. pip3 install pycairo to build and install Pycairo
 3. pip3 install PyGObject to build and install PyGObject
 """
-from typing import Tuple, Any
+from typing import Tuple, Any, List
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -41,6 +41,29 @@ from torchsummary import summary as summary_1
 from torchinfo import summary as summary_2
 
 from prettytable import PrettyTable
+
+import random
+
+
+def is_run_in_colab() -> bool:
+    """
+    Питон работает в Колабе Google
+    :return:
+    """
+    import os
+
+    if os.getenv("COLAB_RELEASE_TAG"):
+        return True
+    else:
+        return False
+
+
+# сохраним в переменную
+is_code_in_colab = is_run_in_colab()
+
+if is_code_in_colab:
+    # позволит график обновлять
+    from IPython import display
 
 
 def create_model(norm=False, dropout=False, batch_norm=False):
@@ -168,6 +191,23 @@ def show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accur
     plt.show()
 
 
+def show_graphs_on_axis(ax: List, y: List[List], captions: List[str], clear=True) -> None:
+    """
+    Построение графиков
+    :param ax: Массив осей
+    :param y: Массив с данными для каждой оси
+    :param captions: Массив заголовков для осей
+    :param clear: Очистка предыдущего графика
+    :return:
+    """
+    for i in range(len(ax)):
+        if clear:
+            ax[i].clear()
+        ax[i].plot(np.arange(len(y[i])), y[i])
+        ax[i].set_title(captions[i])
+        ax[i].grid(True)
+
+
 def train(model, train_loader, loss_function, optimizer, device, epoch, log_interval=-1) -> Tuple[float, float]:
     """
     Обучение модели и сбор метрик: loss и accuracy
@@ -180,6 +220,7 @@ def train(model, train_loader, loss_function, optimizer, device, epoch, log_inte
     :param log_interval:
     :return:
     """
+    # return random.random(), random.random()
     model.train()
 
     total_loss = 0
@@ -222,6 +263,7 @@ def eval_model(model, train_loader, loss_function, device, epoch, log_interval=-
     :param log_interval:
     :return:
     """
+    # return random.random(), random.random()
     model.eval()
 
     total_loss = 0
@@ -322,6 +364,25 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, lo
 
     print(f"start train: epochs = {epochs}, device = {device}")
 
+    # Создаем на чем рисовать графики: 2x2
+    fig, axis = plt.subplots(2, 2, figsize=(12, 8))
+
+    # заголовок окна
+    plt.get_current_fig_manager().set_window_title('Обучение модели')
+
+    # 2x2 в массив из 4 элементов
+    axis = axis.flatten()
+
+    # данные для графиков
+    y = [train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist]
+
+    # подписи для графиков
+    captions = ["train_loss", "test_loss", "train_accuracy", "test_accuracy"]
+
+    # создаем сначала пустой график
+
+    show_graphs_on_axis(axis, y, captions, clear=False)
+
     for i in range(epochs):
 
         train_loss, train_accuracy = train(model_to_train, train_loader, loss_function, optimizer, device, i,
@@ -340,11 +401,27 @@ def train_model(model_to_train, train_loader, test_loader, device, epochs=10, lo
             test_accuracy_hist.append(train_accuracy)
 
             if not show_graph_only_total:
-                show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist,
-                            f"epoch: {i + 1}/{epochs}")
+                fig.suptitle(f'Epoch {i+1}/{epochs}')
+
+                show_graphs_on_axis(axis, y, captions)
+
+                # обновляем и оставляем только одну фигуру
+
+                if is_code_in_colab:
+                    plt.tight_layout()
+                    display.display(fig)
+                    display.clear_output(wait=True)
+                else:
+                    plt.pause(0.01)
+
+        else:
+            print(f"epoch: {i + 1}/{epochs}, "
+                  f"train_loss = {train_loss:.6f}, train_accuracy = {train_accuracy:.6f}, "
+                  f"test_loss = {test_loss:.6f}, test_accuracy = {test_accuracy:.6f}")
 
     if show_graph and show_graph_only_total:
-        show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist, "Finished")
+        show_graphs_on_axis(axis, y, captions)
+    plt.show()
 
 
 def get_device():
@@ -378,10 +455,10 @@ def model_1(epochs=10) -> None:
     model = create_model(batch_norm=True).to(my_device)
 
     print("1. summary from torchsummary")
-    summary_1(model, (28, 28, 1))
+    summary_1(model, (28, 28, 1), device=str(my_device))
 
     print("2. summary from torchinfo")
-    summary_2(model)
+    summary_2(model, depth=5, device=my_device)
 
     print_count_parameters(model)
 
@@ -422,10 +499,3 @@ if __name__ == '__main__':
 
     model_1(30)
     model_2(30)
-
-    # train_loss_hist = []
-    # test_loss_hist = []
-
-    # train_accuracy_hist = []
-    # test_accuracy_hist = []
-    # show_graphs(train_loss_hist, test_loss_hist, train_accuracy_hist, test_accuracy_hist)
