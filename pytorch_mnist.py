@@ -22,6 +22,14 @@ https://pygobject.readthedocs.io/en/latest/getting_started.html#fedora-getting-s
 1. sudo dnf install python3.11-devel
 2. pip3 install pycairo to build and install Pycairo
 3. pip3 install PyGObject to build and install PyGObject
+
+
+skip-connection:
+https://chautuankien.medium.com/skip-connection-and-explanation-of-resnet-afabe792346c
+
+https://discuss.pytorch.org/t/how-to-concatenate-layers-in-pytorch-similar-to-tf-keras-layers-concatenate/33736/6
+
+https://www.youtube.com/watch?v=5YPRbHYB5ME
 """
 from typing import Tuple, Any, List
 
@@ -43,6 +51,8 @@ from torchsummary import summary as summary_1
 from torchinfo import summary as summary_2
 
 from prettytable import PrettyTable
+
+from SimpleModelWithSkipConnections import SimpleModelWithSkipConnections
 
 
 def is_run_in_colab() -> bool:
@@ -90,13 +100,17 @@ def create_model(norm=False, dropout=False, batch_norm=False):
     if dropout:
         model.append(nn.Dropout(0.5))
 
-    model.append(nn.Linear(in_features=128, out_features=64))
+    skip = nn.Linear(in_features=128, out_features=64)
+    model.append(skip)
     model.append(nn.ReLU())
 
     if dropout:
         model.append(nn.Dropout(0.5))
 
     model.append(nn.Linear(in_features=64, out_features=10))
+    model.append(nn.ReLU())
+
+    model.append(nn.Sequential(skip, nn.ReLU()))
 
     if dropout:
         model.append(nn.Dropout(0.25))
@@ -104,6 +118,20 @@ def create_model(norm=False, dropout=False, batch_norm=False):
     model.append(nn.Sigmoid())
 
     return model
+
+
+def create_model_skip_con(norm=False, dropout=False, batch_norm=False):
+    """
+    Создание модели со skip connection
+    :param batch_norm:
+    Добавить слой BatchNorm
+    :param dropout:
+    Добавить слой Dropout
+    :param norm:
+    Добавить слой для нормализации данных
+    :return: Модель
+    """
+    return SimpleModelWithSkipConnections(norm=norm, dropout=dropout, batch_norm=batch_norm)
 
 
 def create_model_conv2d():
@@ -469,6 +497,37 @@ def model_1(epochs=10) -> None:
     train_model(model, train_loader, test_loader, device=my_device, epochs=epochs)
 
 
+def model_1_1(epochs=10) -> None:
+    """
+    Test simple model
+    :param epochs:
+    :return:
+    """
+
+    print("Test simple model")
+
+    # устройство на котором обучаем, CPU/GPU
+    my_device = get_device()
+
+    # создаем модель и переносим на устройство
+    model = create_model_skip_con(batch_norm=True).to(my_device)
+
+    print("1. summary from torchsummary")
+    summary_1(model, (28, 28, 1), device=str(my_device))
+
+    print("2. summary from torchinfo")
+    summary_2(model, depth=5, device=my_device)
+
+    print_count_parameters(model)
+
+    # загрузка и подготовка датасета
+    train_loader, test_loader = get_train_and_test_data()
+
+    # запуск обучения
+
+    train_model(model, train_loader, test_loader, device=my_device, epochs=epochs)
+
+
 def model_2(epochs=10) -> None:
     """
     Test hard model
@@ -496,5 +555,5 @@ def model_2(epochs=10) -> None:
 if __name__ == '__main__':
     np.random.seed(123)
 
-    model_1(30)
-    model_2(30)
+    model_1_1(5)
+    # model_2(30)
